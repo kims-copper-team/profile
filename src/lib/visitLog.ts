@@ -1,9 +1,7 @@
+import { headers } from "next/headers";
+import { getSupabaseClient, isSupabaseConfigured } from "./supabase";
 import fs from "fs";
 import path from "path";
-import { headers } from "next/headers";
-
-const LOG_FILE = path.join(process.cwd(), "data", "visitors.jsonl");
-const MAX_LINES = 3000;
 
 export type VisitEntry = {
   ts: string;
@@ -13,6 +11,8 @@ export type VisitEntry = {
   ref: string;
 };
 
+const LOG_FILE = path.join(process.cwd(), "data", "visitors.jsonl");
+
 export async function logVisit(page: string) {
   try {
     const h = await headers();
@@ -21,42 +21,46 @@ export async function logVisit(page: string) {
       (forwarded ? forwarded.split(",")[0].trim() : null) ??
       h.get("x-real-ip") ??
       "::1";
+    const ua = h.get("user-agent") ?? "";
+    const ref = h.get("referer") ?? "";
 
-    const entry: VisitEntry = {
-      ts: new Date().toISOString(),
-      ip,
-      page,
-      ua: h.get("user-agent") ?? "",
-      ref: h.get("referer") ?? "",
-    };
-
-    fs.mkdirSync(path.dirname(LOG_FILE), { recursive: true });
-    fs.appendFileSync(LOG_FILE, JSON.stringify(entry) + "\n", "utf-8");
-
-    const stat = fs.statSync(LOG_FILE);
-    if (stat.size > 2 * 1024 * 1024) trimOldEntries();
+    if (isSupabaseConfigured()) {
+      const db = getSupabaseClient();
+      await db.from("visitor_logs").insert({ ip, page, ua, ref });
+    } else {
+      // Fallback: file-based logging
+      fs.mkdirSync(path.dirname(LOG_FILE), { recursive: true });
+      fs.appendFileSync(LOG_FILE, JSON.stringify({ ts: new Date().toISOString(), ip, page, ua, ref }) + "\n");
+    }
   } catch {
-    // never crash the page due to logging failure
+    // never crash the page
   }
 }
 
-function trimOldEntries() {
-  try {
-    const lines = fs.readFileSync(LOG_FILE, "utf-8").split("\n").filter(Boolean);
-    if (lines.length > MAX_LINES) {
-      fs.writeFileSync(LOG_FILE, lines.slice(-MAX_LINES).join("\n") + "\n", "utf-8");
-    }
-  } catch {}
-}
+export async function readVisitLogs(limit = 1000): Promise<VisitEntry[]> {
+  if (isSupabaseConfigured()) {
+    const db = getSupabaseClient();
+    const { data, error } = await db
+      .from("visitor_logs")
+      .select("ts, ip, page, ua, ref")
+      .order("ts", { ascending: false })
+      .limit(limit);
 
-export function readVisitLogs(limit = 1000): VisitEntry[] {
+    if (error || !data) return [];
+    return data.map((row) => ({
+      ts: row.ts as string,
+      ip: row.ip as string,
+      page: row.page as string,
+      ua: row.ua as string,
+      ref: row.ref as string,
+    }));
+  }
+
+  // Fallback: file-based
   try {
     if (!fs.existsSync(LOG_FILE)) return [];
     const lines = fs.readFileSync(LOG_FILE, "utf-8").split("\n").filter(Boolean);
-    return lines
-      .slice(-limit)
-      .reverse()
-      .map((l) => JSON.parse(l) as VisitEntry);
+    return lines.slice(-limit).reverse().map((l) => JSON.parse(l) as VisitEntry);
   } catch {
     return [];
   }

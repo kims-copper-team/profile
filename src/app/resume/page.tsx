@@ -22,7 +22,7 @@ const Tag = ({ children }: { children: React.ReactNode }) => (
 
 export default async function ResumePage() {
   await logVisit("/resume");
-  const { personal, education, experience, skills, certifications, languages } = getResumeData();
+  const { personal, education, experience, skills, certifications, languages } = await getResumeData();
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
