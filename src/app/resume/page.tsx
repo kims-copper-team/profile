@@ -70,17 +70,14 @@ export default function ResumePage() {
 
         {Object.keys(skills).length > 0 && (
           <section className="mb-8">
-            <SectionTitle>기술 스택</SectionTitle>
+            <SectionTitle>Skills</SectionTitle>
             <div className="space-y-3">
-              {Object.entries(skills).map(([cat, items]) => {
-                const labels: Record<string, string> = { frontend: "Frontend", backend: "Backend", database: "Database", devops: "DevOps", tools: "Tools" };
-                return (
-                  <div key={cat} className="flex flex-wrap gap-x-3 gap-y-1 items-baseline">
-                    <span className="text-xs text-gray-400 w-20 shrink-0">{labels[cat] ?? cat}</span>
-                    <div className="flex flex-wrap gap-1.5">{items.map((s) => <Tag key={s}>{s}</Tag>)}</div>
-                  </div>
-                );
-              })}
+              {Object.entries(skills).map(([cat, items]) => (
+                <div key={cat} className="flex flex-wrap gap-x-3 gap-y-1 items-baseline">
+                  <span className="text-xs text-gray-400 w-20 shrink-0">{cat}</span>
+                  <div className="flex flex-wrap gap-1.5">{items.map((s) => <Tag key={s}>{s}</Tag>)}</div>
+                </div>
+              ))}
             </div>
           </section>
         )}

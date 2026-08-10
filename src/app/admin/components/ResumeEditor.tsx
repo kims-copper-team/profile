@@ -11,13 +11,6 @@ interface Props {
   saving: boolean;
 }
 
-const SKILL_CATEGORIES = [
-  { key: "frontend", label: "Frontend" },
-  { key: "backend", label: "Backend" },
-  { key: "database", label: "Database" },
-  { key: "devops", label: "DevOps" },
-  { key: "tools", label: "Tools" },
-];
 
 export default function ResumeEditor({ initial, onSave, saving }: Props) {
   const [data, setData] = useState<ResumeData>(initial);
@@ -60,6 +53,23 @@ export default function ResumeEditor({ initial, onSave, saving }: Props) {
 
   const updateSkills = (category: string, items: string[]) =>
     setData((d) => ({ ...d, skills: { ...d.skills, [category]: items } }));
+
+  const renameSkillCategory = (idx: number, newName: string) =>
+    setData((d) => {
+      const entries = Object.entries(d.skills);
+      const newSkills: Record<string, string[]> = {};
+      entries.forEach(([k, v], i) => { newSkills[i === idx ? newName : k] = v; });
+      return { ...d, skills: newSkills };
+    });
+
+  const addSkillCategory = () =>
+    setData((d) => ({ ...d, skills: { ...d.skills, "새 카테고리": [] } }));
+
+  const removeSkillCategory = (category: string) =>
+    setData((d) => {
+      const { [category]: _, ...rest } = d.skills;
+      return { ...d, skills: rest };
+    });
 
   const updateCert = (idx: number, key: string, val: string) =>
     setData((d) => {
@@ -201,18 +211,32 @@ export default function ResumeEditor({ initial, onSave, saving }: Props) {
 
       {/* Skills */}
       {tab === "skills" && (
-        <div className="space-y-6">
-          {SKILL_CATEGORIES.map(({ key, label }) => (
-            <div key={key}>
-              <h3 className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">{label}</h3>
+        <div className="space-y-4">
+          {Object.entries(data.skills).map(([cat, items], idx) => (
+            <div key={idx} className="border border-gray-200 rounded-xl p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={cat}
+                  onChange={(e) => renameSkillCategory(idx, e.target.value)}
+                  className="flex-1 px-3 py-1.5 text-sm font-medium border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                  placeholder="카테고리명"
+                />
+                <button onClick={() => removeSkillCategory(cat)} className="text-gray-300 hover:text-red-500 text-xl leading-none shrink-0">×</button>
+              </div>
               <StringListEditor
-                items={data.skills[key] ?? []}
-                onChange={(items) => updateSkills(key, items)}
-                placeholder={`${label} 기술 추가`}
-                addLabel={`${label} 기술 추가`}
+                items={items}
+                onChange={(val) => updateSkills(cat, val)}
+                placeholder="항목 추가"
               />
             </div>
           ))}
+          <button
+            onClick={addSkillCategory}
+            className="w-full py-3 border-2 border-dashed border-gray-200 rounded-xl text-gray-400 hover:border-gray-400 hover:text-gray-600 transition-colors text-sm font-medium"
+          >
+            + 카테고리 추가
+          </button>
         </div>
       )}
 
