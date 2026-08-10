@@ -1,4 +1,5 @@
 import { getResumeData } from "@/lib/serverData";
+import { logVisit } from "@/lib/visitLog";
 import PrintButton from "@/components/PrintButton";
 
 export const dynamic = "force-dynamic";
@@ -19,7 +20,8 @@ const Tag = ({ children }: { children: React.ReactNode }) => (
   </span>
 );
 
-export default function ResumePage() {
+export default async function ResumePage() {
+  await logVisit("/resume");
   const { personal, education, experience, skills, certifications, languages } = getResumeData();
 
   return (

@@ -6,8 +6,9 @@ import dynamic from "next/dynamic";
 
 const ResumeEditor = dynamic(() => import("./components/ResumeEditor"), { ssr: false });
 const CareerEditor = dynamic(() => import("./components/CareerEditor"), { ssr: false });
+const VisitorLog = dynamic(() => import("./components/VisitorLog"), { ssr: false });
 
-type Tab = "resume" | "career";
+type Tab = "resume" | "career" | "visitors";
 
 async function apiFetch(url: string, method: string, password: string, body?: unknown) {
   const res = await fetch(url, {
@@ -184,7 +185,7 @@ export default function AdminPage() {
 
       {/* Main tabs */}
       <div className="flex gap-1 mb-6 border-b border-gray-200 pb-0">
-        {([["resume", "이력서"], ["career", "경력기술서"]] as [Tab, string][]).map(([key, label]) => (
+        {([["resume", "이력서"], ["career", "경력기술서"], ["visitors", "방문자 로그"]] as [Tab, string][]).map(([key, label]) => (
           <button
             key={key}
             onClick={() => setTab(key)}
@@ -213,6 +214,10 @@ export default function AdminPage() {
 
         {!loading && tab === "career" && careerData && (
           <CareerEditor initial={careerData} onSave={saveCareer} saving={saving} />
+        )}
+
+        {tab === "visitors" && (
+          <VisitorLog password={password} />
         )}
       </div>
 

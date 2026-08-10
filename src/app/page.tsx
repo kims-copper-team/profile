@@ -1,8 +1,12 @@
 import Link from "next/link";
-import { resumeData } from "@/data/resume";
+import { getResumeData } from "@/lib/serverData";
+import { logVisit } from "@/lib/visitLog";
 
-export default function Home() {
-  const { personal } = resumeData;
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  await logVisit("/");
+  const { personal } = getResumeData();
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20">

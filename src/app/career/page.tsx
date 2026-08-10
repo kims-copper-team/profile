@@ -1,4 +1,5 @@
 import { getCareerData } from "@/lib/serverData";
+import { logVisit } from "@/lib/visitLog";
 import PrintButton from "@/components/PrintButton";
 
 export const dynamic = "force-dynamic";
@@ -13,7 +14,8 @@ const Tag = ({ children }: { children: React.ReactNode }) => (
   </span>
 );
 
-export default function CareerPage() {
+export default async function CareerPage() {
+  await logVisit("/career");
   const careerData = getCareerData();
 
   return (
