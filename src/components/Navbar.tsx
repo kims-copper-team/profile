@@ -8,7 +8,10 @@ const navLinks = [
   { href: "/", label: "홈" },
   { href: "/resume", label: "이력서" },
   { href: "/career", label: "경력기술서" },
+  { href: "/admin", label: "어드민", adminOnly: true },
 ];
+
+type NavLink = { href: string; label: string; adminOnly?: boolean };
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -24,12 +27,16 @@ export default function Navbar() {
 
           {/* Desktop menu */}
           <div className="hidden sm:flex items-center gap-1">
-            {navLinks.map((link) => (
+            {navLinks.map((link: NavLink) => (
               <Link
                 key={link.href}
                 href={link.href}
                 className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                  pathname === link.href
+                  link.adminOnly
+                    ? pathname === link.href
+                      ? "bg-gray-900 text-white"
+                      : "text-gray-400 hover:text-gray-700 hover:bg-gray-100"
+                    : pathname === link.href
                     ? "bg-gray-900 text-white"
                     : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                 }`}
