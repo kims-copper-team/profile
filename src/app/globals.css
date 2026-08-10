@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@media print {
+  @page {
+    margin: 15mm 15mm;
+    size: A4;
+  }
+
+  body {
+    background: white !important;
+    font-size: 11pt;
+  }
+
+  .print\:hidden {
+    display: none !important;
+  }
+
+  .page-break {
+    break-before: page;
+  }
+}
