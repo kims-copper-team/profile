@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ResumeData } from "@/lib/serverData";
+import { ResumeData } from "@/lib/supabaseClient";
 import StringListEditor from "./StringListEditor";
 import { Input, Textarea, Field } from "./Field";
 

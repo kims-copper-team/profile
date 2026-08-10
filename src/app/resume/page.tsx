@@ -1,28 +1,29 @@
-import { getResumeData } from "@/lib/serverData";
-import { logVisit } from "@/lib/visitLog";
+"use client";
+
+import { useEffect, useState } from "react";
+import { getResumeData, logVisit, type ResumeData } from "@/lib/supabaseClient";
 import PrintButton from "@/components/PrintButton";
 
-export const dynamic = "force-dynamic";
-
-export const metadata = {
-  title: "이력서 | 포트폴리오",
-};
-
 const SectionTitle = ({ children }: { children: React.ReactNode }) => (
-  <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-4 pb-2 border-b border-gray-200">
-    {children}
-  </h2>
+  <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-4 pb-2 border-b border-gray-200">{children}</h2>
 );
-
 const Tag = ({ children }: { children: React.ReactNode }) => (
-  <span className="inline-block px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-700 text-xs font-medium">
-    {children}
-  </span>
+  <span className="inline-block px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-700 text-xs font-medium">{children}</span>
 );
 
-export default async function ResumePage() {
-  await logVisit("/resume");
-  const { personal, education, experience, skills, certifications, languages } = await getResumeData();
+export default function ResumePage() {
+  const [data, setData] = useState<ResumeData | null>(null);
+
+  useEffect(() => {
+    logVisit("/resume");
+    getResumeData().then(setData);
+  }, []);
+
+  if (!data) {
+    return <div className="flex items-center justify-center min-h-screen"><div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin" /></div>;
+  }
+
+  const { personal, education, experience, skills, certifications, languages } = data;
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -46,12 +47,7 @@ export default async function ResumePage() {
           </div>
         </div>
 
-        {personal.summary && (
-          <section className="mb-8">
-            <SectionTitle>소개</SectionTitle>
-            <p className="text-gray-700 leading-relaxed">{personal.summary}</p>
-          </section>
-        )}
+        {personal.summary && <section className="mb-8"><SectionTitle>소개</SectionTitle><p className="text-gray-700 leading-relaxed">{personal.summary}</p></section>}
 
         {experience.length > 0 && (
           <section className="mb-8">
@@ -60,20 +56,12 @@ export default async function ResumePage() {
               {experience.map((exp, idx) => (
                 <div key={idx}>
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-2">
-                    <div>
-                      <h3 className="font-semibold text-gray-900">{exp.company}</h3>
-                      <p className="text-gray-600 text-sm">{exp.position}</p>
-                    </div>
+                    <div><h3 className="font-semibold text-gray-900">{exp.company}</h3><p className="text-gray-600 text-sm">{exp.position}</p></div>
                     <span className="text-sm text-gray-400 shrink-0">{exp.period}</span>
                   </div>
-                  <ul className="space-y-1">
-                    {exp.description.map((item, i) => (
-                      <li key={i} className="text-gray-600 text-sm flex gap-2">
-                        <span className="text-gray-300 mt-1">·</span>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <ul className="space-y-1">{exp.description.map((item, i) => (
+                    <li key={i} className="text-gray-600 text-sm flex gap-2"><span className="text-gray-300 mt-1">·</span><span>{item}</span></li>
+                  ))}</ul>
                 </div>
               ))}
             </div>
@@ -84,14 +72,12 @@ export default async function ResumePage() {
           <section className="mb-8">
             <SectionTitle>기술 스택</SectionTitle>
             <div className="space-y-3">
-              {Object.entries(skills).map(([category, items]) => {
+              {Object.entries(skills).map(([cat, items]) => {
                 const labels: Record<string, string> = { frontend: "Frontend", backend: "Backend", database: "Database", devops: "DevOps", tools: "Tools" };
                 return (
-                  <div key={category} className="flex flex-wrap gap-x-3 gap-y-1 items-baseline">
-                    <span className="text-xs text-gray-400 w-20 shrink-0">{labels[category] ?? category}</span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {items.map((skill) => <Tag key={skill}>{skill}</Tag>)}
-                    </div>
+                  <div key={cat} className="flex flex-wrap gap-x-3 gap-y-1 items-baseline">
+                    <span className="text-xs text-gray-400 w-20 shrink-0">{labels[cat] ?? cat}</span>
+                    <div className="flex flex-wrap gap-1.5">{items.map((s) => <Tag key={s}>{s}</Tag>)}</div>
                   </div>
                 );
               })}
@@ -107,11 +93,7 @@ export default async function ResumePage() {
                 <div key={idx} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
                   <div>
                     <h3 className="font-semibold text-gray-900">{edu.school}</h3>
-                    <p className="text-sm text-gray-600">
-                      {edu.major} · {edu.degree}
-                      {edu.gpa && <span className="ml-2 text-gray-400">GPA {edu.gpa}</span>}
-                      {edu.note && <span className="ml-2 text-gray-400">({edu.note})</span>}
-                    </p>
+                    <p className="text-sm text-gray-600">{edu.major} · {edu.degree}{edu.gpa && <span className="ml-2 text-gray-400">GPA {edu.gpa}</span>}{edu.note && <span className="ml-2 text-gray-400">({edu.note})</span>}</p>
                   </div>
                   <span className="text-sm text-gray-400 shrink-0">{edu.period}</span>
                 </div>
@@ -127,10 +109,7 @@ export default async function ResumePage() {
               <div className="space-y-2">
                 {certifications.map((cert, idx) => (
                   <div key={idx} className="flex justify-between text-sm">
-                    <div>
-                      <span className="font-medium text-gray-800">{cert.name}</span>
-                      <span className="text-gray-400 ml-2">{cert.issuer}</span>
-                    </div>
+                    <div><span className="font-medium text-gray-800">{cert.name}</span><span className="text-gray-400 ml-2">{cert.issuer}</span></div>
                     <span className="text-gray-400 shrink-0 ml-4">{cert.date}</span>
                   </div>
                 ))}

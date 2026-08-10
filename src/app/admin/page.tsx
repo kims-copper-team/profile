@@ -1,8 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { ResumeData, CareerProject } from "@/lib/serverData";
 import dynamic from "next/dynamic";
+import type { User } from "@supabase/supabase-js";
+import {
+  supabase,
+  getResumeData,
+  getCareerData,
+  saveResumeData,
+  saveCareerData,
+  type ResumeData,
+  type CareerProject,
+} from "@/lib/supabaseClient";
 
 const ResumeEditor = dynamic(() => import("./components/ResumeEditor"), { ssr: false });
 const CareerEditor = dynamic(() => import("./components/CareerEditor"), { ssr: false });
@@ -10,21 +19,11 @@ const VisitorLog = dynamic(() => import("./components/VisitorLog"), { ssr: false
 
 type Tab = "resume" | "career" | "visitors";
 
-async function apiFetch(url: string, method: string, password: string, body?: unknown) {
-  const res = await fetch(url, {
-    method,
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${password}`,
-    },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  return res;
-}
-
 export default function AdminPage() {
+  const [user, setUser] = useState<User | null>(null);
+  const [sessionChecked, setSessionChecked] = useState(false);
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [inputPw, setInputPw] = useState("");
   const [authError, setAuthError] = useState("");
   const [tab, setTab] = useState<Tab>("resume");
   const [resumeData, setResumeData] = useState<ResumeData | null>(null);
@@ -38,51 +37,54 @@ export default function AdminPage() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  const login = async () => {
-    setAuthError("");
-    setLoading(true);
-    try {
-      const res = await fetch("/api/data/resume", {
-        headers: { Authorization: `Bearer ${inputPw}` },
-      });
-      if (res.status === 401) {
-        setAuthError("비밀번호가 틀렸습니다.");
-      } else {
-        const data = await res.json();
-        setResumeData(data);
-        setPassword(inputPw);
-        sessionStorage.setItem("adminPw", inputPw);
-      }
-    } catch {
-      setAuthError("서버 오류가 발생했습니다.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Restore session
   useEffect(() => {
-    const saved = sessionStorage.getItem("adminPw");
-    if (saved) {
-      setInputPw(saved);
-    }
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      if (currentUser) {
+        setLoading(true);
+        getResumeData().then(setResumeData).finally(() => setLoading(false));
+      }
+      setSessionChecked(true);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   // Load career data when tab switches
   useEffect(() => {
-    if (!password || tab !== "career" || careerData !== null) return;
+    if (!user || tab !== "career" || careerData !== null) return;
     setLoading(true);
-    apiFetch("/api/data/career", "GET", password)
-      .then((r) => r.json())
-      .then((d) => setCareerData(d))
-      .finally(() => setLoading(false));
-  }, [tab, password, careerData]);
+    getCareerData().then(setCareerData).finally(() => setLoading(false));
+  }, [tab, user, careerData]);
 
-  const saveResume = async (data: ResumeData) => {
+  const login = async () => {
+    setAuthError("");
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      setAuthError("이메일 또는 비밀번호가 올바르지 않습니다.");
+    } else {
+      setLoading(true);
+      getResumeData().then(setResumeData).finally(() => setLoading(false));
+    }
+  };
+
+  const logout = async () => {
+    await supabase.auth.signOut();
+    setResumeData(null);
+    setCareerData(null);
+    setEmail("");
+    setPassword("");
+  };
+
+  const handleSaveResume = async (data: ResumeData) => {
     setSaving(true);
     try {
-      const res = await apiFetch("/api/data/resume", "PUT", password, data);
-      if (!res.ok) throw new Error();
+      await saveResumeData(data);
       setResumeData(data);
       showToast("success", "이력서가 저장되었습니다.");
     } catch {
@@ -92,11 +94,10 @@ export default function AdminPage() {
     }
   };
 
-  const saveCareer = async (data: CareerProject[]) => {
+  const handleSaveCareer = async (data: CareerProject[]) => {
     setSaving(true);
     try {
-      const res = await apiFetch("/api/data/career", "PUT", password, data);
-      if (!res.ok) throw new Error();
+      await saveCareerData(data);
       setCareerData(data);
       showToast("success", "경력기술서가 저장되었습니다.");
     } catch {
@@ -106,16 +107,13 @@ export default function AdminPage() {
     }
   };
 
-  const logout = () => {
-    setPassword("");
-    setInputPw("");
-    setResumeData(null);
-    setCareerData(null);
-    sessionStorage.removeItem("adminPw");
-  };
+  // Session check in progress
+  if (!sessionChecked) {
+    return <div className="flex items-center justify-center min-h-screen"><div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin" /></div>;
+  }
 
   // ---- Login screen ----
-  if (!password) {
+  if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
         <div className="w-full max-w-sm">
@@ -132,29 +130,30 @@ export default function AdminPage() {
 
             <div className="space-y-3">
               <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="이메일"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                autoFocus
+              />
+              <input
                 type="password"
-                value={inputPw}
-                onChange={(e) => setInputPw(e.target.value)}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && login()}
                 placeholder="비밀번호"
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-                autoFocus
               />
               {authError && <p className="text-sm text-red-500">{authError}</p>}
               <button
                 onClick={login}
-                disabled={loading || !inputPw}
+                disabled={!email || !password}
                 className="w-full py-3 rounded-xl bg-gray-900 text-white font-medium text-sm hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {loading ? "확인 중..." : "로그인"}
+                로그인
               </button>
             </div>
-
-            <p className="text-xs text-gray-400 text-center mt-4">
-              기본 비밀번호: <code className="bg-gray-100 px-1 rounded">admin1234</code>
-              <br />
-              <span className="text-gray-300">(.env.local의 ADMIN_PASSWORD로 변경)</span>
-            </p>
           </div>
         </div>
       </div>
@@ -164,13 +163,13 @@ export default function AdminPage() {
   // ---- Admin dashboard ----
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">어드민</h1>
           <p className="text-sm text-gray-500 mt-0.5">이력서 / 경력기술서 관리</p>
         </div>
         <div className="flex items-center gap-3">
+          <span className="text-xs text-gray-400 hidden sm:block">{user.email}</span>
           <a href="/" target="_blank" rel="noreferrer" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
             사이트 보기 →
           </a>
@@ -183,7 +182,6 @@ export default function AdminPage() {
         </div>
       </div>
 
-      {/* Main tabs */}
       <div className="flex gap-1 mb-6 border-b border-gray-200 pb-0">
         {([["resume", "이력서"], ["career", "경력기술서"], ["visitors", "방문자 로그"]] as [Tab, string][]).map(([key, label]) => (
           <button
@@ -200,7 +198,6 @@ export default function AdminPage() {
         ))}
       </div>
 
-      {/* Content */}
       <div className="bg-white rounded-b-2xl rounded-tr-2xl border border-gray-200 p-6 sm:p-8">
         {loading && (
           <div className="flex items-center justify-center py-20 text-gray-400 text-sm">
@@ -209,27 +206,23 @@ export default function AdminPage() {
         )}
 
         {!loading && tab === "resume" && resumeData && (
-          <ResumeEditor initial={resumeData} onSave={saveResume} saving={saving} />
+          <ResumeEditor initial={resumeData} onSave={handleSaveResume} saving={saving} />
         )}
 
         {!loading && tab === "career" && careerData && (
-          <CareerEditor initial={careerData} onSave={saveCareer} saving={saving} />
+          <CareerEditor initial={careerData} onSave={handleSaveCareer} saving={saving} />
         )}
 
-        {tab === "visitors" && (
-          <VisitorLog password={password} />
-        )}
+        {tab === "visitors" && <VisitorLog />}
       </div>
 
-      {/* Toast */}
       {toast && (
         <div
           className={`fixed bottom-6 right-6 px-4 py-3 rounded-xl shadow-lg text-sm font-medium text-white transition-all ${
             toast.type === "success" ? "bg-green-600" : "bg-red-600"
           }`}
         >
-          {toast.type === "success" ? "✓ " : "✗ "}
-          {toast.msg}
+          {toast.type === "success" ? "✓ " : "✗ "}{toast.msg}
         </div>
       )}
     </div>

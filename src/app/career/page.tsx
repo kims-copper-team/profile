@@ -1,12 +1,8 @@
-import { getCareerData } from "@/lib/serverData";
-import { logVisit } from "@/lib/visitLog";
+"use client";
+
+import { useEffect, useState } from "react";
+import { getCareerData, logVisit, type CareerProject } from "@/lib/supabaseClient";
 import PrintButton from "@/components/PrintButton";
-
-export const dynamic = "force-dynamic";
-
-export const metadata = {
-  title: "경력기술서 | 포트폴리오",
-};
 
 const Tag = ({ children }: { children: React.ReactNode }) => (
   <span className="inline-block px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 text-xs font-medium border border-blue-100">
@@ -14,9 +10,17 @@ const Tag = ({ children }: { children: React.ReactNode }) => (
   </span>
 );
 
-export default async function CareerPage() {
-  await logVisit("/career");
-  const careerData = await getCareerData();
+export default function CareerPage() {
+  const [data, setData] = useState<CareerProject[] | null>(null);
+
+  useEffect(() => {
+    logVisit("/career");
+    getCareerData().then(setData);
+  }, []);
+
+  if (!data) {
+    return <div className="flex items-center justify-center min-h-screen"><div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin" /></div>;
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -26,7 +30,7 @@ export default async function CareerPage() {
       </div>
 
       <div className="space-y-6">
-        {careerData.map((project, idx) => (
+        {data.map((project, idx) => (
           <article
             key={project.id}
             className={`bg-white rounded-2xl border border-gray-200 shadow-sm p-8 sm:p-10 print:shadow-none print:border-none print:border-t print:border-gray-200 print:rounded-none print:pt-8 ${idx > 0 ? "page-break" : ""}`}

@@ -1,21 +1,13 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import { supabase } from "@/lib/supabaseClient";
 
 type VisitEntry = {
   ts: string;
-  ip: string;
   page: string;
   ua: string;
   ref: string;
-};
-
-type IpStat = {
-  ip: string;
-  count: number;
-  pages: string[];
-  lastSeen: string;
-  firstSeen: string;
 };
 
 function parseDevice(ua: string): string {
@@ -44,9 +36,7 @@ function formatTime(ts: string): string {
 }
 
 function isToday(ts: string): boolean {
-  const d = new Date(ts);
-  const now = new Date();
-  return d.toDateString() === now.toDateString();
+  return new Date(ts).toDateString() === new Date().toDateString();
 }
 
 const PAGE_LABEL: Record<string, string> = {
@@ -55,57 +45,45 @@ const PAGE_LABEL: Record<string, string> = {
   "/career": "경력기술서",
 };
 
-function isLocal(ip: string) {
-  return ip === "::1" || ip === "127.0.0.1" || ip.startsWith("192.168.") || ip.startsWith("10.");
-}
-
-interface Props {
-  password: string;
-}
-
-export default function VisitorLog({ password }: Props) {
+export default function VisitorLog() {
   const [logs, setLogs] = useState<VisitEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filterIp, setFilterIp] = useState<string | null>(null);
   const [filterPage, setFilterPage] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/admin/visitors?limit=1000", {
-      headers: { Authorization: `Bearer ${password}` },
-    })
-      .then((r) => r.json())
-      .then((data) => setLogs(Array.isArray(data) ? data : []))
-      .finally(() => setLoading(false));
-  }, [password]);
+    supabase
+      .from("visitor_logs")
+      .select("ts, page, ua, ref")
+      .order("ts", { ascending: false })
+      .limit(1000)
+      .then(({ data }) => {
+        setLogs(Array.isArray(data) ? data : []);
+        setLoading(false);
+      });
+  }, []);
 
   const filtered = useMemo(() => {
-    return logs.filter((e) => {
-      if (filterIp && e.ip !== filterIp) return false;
-      if (filterPage && e.page !== filterPage) return false;
-      return true;
-    });
-  }, [logs, filterIp, filterPage]);
+    if (!filterPage) return logs;
+    return logs.filter((e) => e.page === filterPage);
+  }, [logs, filterPage]);
 
   const stats = useMemo(() => {
     const total = logs.length;
     const todayCount = logs.filter((e) => isToday(e.ts)).length;
-    const uniqueIps = new Set(logs.map((e) => e.ip)).size;
 
-    const ipMap = new Map<string, IpStat>();
+    const pageCount: Record<string, number> = {};
     for (const e of logs) {
-      const existing = ipMap.get(e.ip);
-      if (existing) {
-        existing.count++;
-        if (!existing.pages.includes(e.page)) existing.pages.push(e.page);
-        if (e.ts > existing.lastSeen) existing.lastSeen = e.ts;
-        if (e.ts < existing.firstSeen) existing.firstSeen = e.ts;
-      } else {
-        ipMap.set(e.ip, { ip: e.ip, count: 1, pages: [e.page], lastSeen: e.ts, firstSeen: e.ts });
-      }
+      pageCount[e.page] = (pageCount[e.page] ?? 0) + 1;
     }
-    const ipStats = Array.from(ipMap.values()).sort((a, b) => b.count - a.count);
 
-    return { total, todayCount, uniqueIps, ipStats };
+    const browserCount: Record<string, number> = {};
+    for (const e of logs) {
+      const b = parseDevice(e.ua);
+      browserCount[b] = (browserCount[b] ?? 0) + 1;
+    }
+    const browsers = Object.entries(browserCount).sort((a, b) => b[1] - a[1]);
+
+    return { total, todayCount, pageCount, browsers };
   }, [logs]);
 
   if (loading) {
@@ -114,12 +92,12 @@ export default function VisitorLog({ password }: Props) {
 
   return (
     <div className="space-y-6">
-      {/* Stats */}
+      {/* Summary stats */}
       <div className="grid grid-cols-3 gap-4">
         {[
           { label: "총 방문수", value: stats.total.toLocaleString() },
           { label: "오늘 방문", value: stats.todayCount.toLocaleString() },
-          { label: "고유 IP", value: stats.uniqueIps.toLocaleString() },
+          { label: "페이지 종류", value: Object.keys(stats.pageCount).length.toString() },
         ].map((s) => (
           <div key={s.label} className="bg-gray-50 rounded-xl p-4 text-center border border-gray-100">
             <div className="text-2xl font-bold text-gray-900">{s.value}</div>
@@ -128,62 +106,43 @@ export default function VisitorLog({ password }: Props) {
         ))}
       </div>
 
-      {/* Active filters */}
-      {(filterIp || filterPage) && (
-        <div className="flex items-center gap-2 text-sm">
-          <span className="text-gray-500">필터:</span>
-          {filterIp && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 font-mono text-xs">
-              IP: {filterIp}
-              <button onClick={() => setFilterIp(null)} className="hover:text-blue-900 ml-1">×</button>
-            </span>
-          )}
-          {filterPage && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-green-50 text-green-700 text-xs">
-              페이지: {PAGE_LABEL[filterPage] ?? filterPage}
-              <button onClick={() => setFilterPage(null)} className="hover:text-green-900 ml-1">×</button>
-            </span>
-          )}
-          <button onClick={() => { setFilterIp(null); setFilterPage(null); }} className="text-gray-400 hover:text-gray-700 ml-1">
-            전체 초기화
-          </button>
-        </div>
-      )}
-
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* IP ranking */}
-        <div className="lg:col-span-1">
-          <h3 className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">IP별 방문 현황</h3>
-          <div className="space-y-1.5 max-h-96 overflow-y-auto pr-1">
-            {stats.ipStats.length === 0 && (
-              <p className="text-sm text-gray-400 py-4 text-center">방문 기록 없음</p>
-            )}
-            {stats.ipStats.map((stat) => (
-              <button
-                key={stat.ip}
-                onClick={() => setFilterIp(filterIp === stat.ip ? null : stat.ip)}
-                className={`w-full text-left px-3 py-2.5 rounded-lg text-sm transition-colors ${
-                  filterIp === stat.ip
-                    ? "bg-gray-900 text-white"
-                    : "bg-gray-50 hover:bg-gray-100 text-gray-700"
-                }`}
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-mono text-xs truncate">
-                    {isLocal(stat.ip) ? "🏠 " : ""}
-                    {stat.ip}
-                  </span>
-                  <span className={`shrink-0 text-xs font-semibold px-1.5 py-0.5 rounded-full ${
-                    filterIp === stat.ip ? "bg-white/20" : "bg-gray-200 text-gray-600"
-                  }`}>
-                    {stat.count}
-                  </span>
+        {/* Page / Browser breakdown */}
+        <div className="lg:col-span-1 space-y-6">
+          <div>
+            <h3 className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">페이지별 방문</h3>
+            <div className="space-y-1.5">
+              {Object.entries(stats.pageCount)
+                .sort((a, b) => b[1] - a[1])
+                .map(([page, count]) => (
+                  <button
+                    key={page}
+                    onClick={() => setFilterPage(filterPage === page ? null : page)}
+                    className={`w-full text-left px-3 py-2.5 rounded-lg text-sm transition-colors ${
+                      filterPage === page ? "bg-gray-900 text-white" : "bg-gray-50 hover:bg-gray-100 text-gray-700"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span>{PAGE_LABEL[page] ?? page}</span>
+                      <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full ${
+                        filterPage === page ? "bg-white/20" : "bg-gray-200 text-gray-600"
+                      }`}>{count}</span>
+                    </div>
+                  </button>
+                ))}
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">브라우저</h3>
+            <div className="space-y-1.5">
+              {stats.browsers.map(([browser, count]) => (
+                <div key={browser} className="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg text-sm">
+                  <span className="text-gray-700">{browser}</span>
+                  <span className="text-xs font-semibold bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded-full">{count}</span>
                 </div>
-                <div className={`text-xs mt-0.5 ${filterIp === stat.ip ? "text-gray-300" : "text-gray-400"}`}>
-                  {stat.pages.map((p) => PAGE_LABEL[p] ?? p).join(" · ")} · {formatTime(stat.lastSeen)}
-                </div>
-              </button>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
 
@@ -191,9 +150,8 @@ export default function VisitorLog({ password }: Props) {
         <div className="lg:col-span-2">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-xs font-semibold uppercase tracking-widest text-gray-400">
-              방문 로그 {filtered.length > 0 && <span className="text-gray-300">({filtered.length}건)</span>}
+              방문 로그{filtered.length > 0 && <span className="text-gray-300 ml-1">({filtered.length}건)</span>}
             </h3>
-            {/* Page filter */}
             <div className="flex gap-1">
               {Object.entries(PAGE_LABEL).map(([path, label]) => (
                 <button
@@ -206,6 +164,11 @@ export default function VisitorLog({ password }: Props) {
                   {label}
                 </button>
               ))}
+              {filterPage && (
+                <button onClick={() => setFilterPage(null)} className="px-2.5 py-1 text-xs text-gray-400 hover:text-gray-700">
+                  초기화
+                </button>
+              )}
             </div>
           </div>
 
@@ -218,7 +181,6 @@ export default function VisitorLog({ password }: Props) {
                   <thead className="sticky top-0 bg-gray-50 border-b border-gray-200">
                     <tr>
                       <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 whitespace-nowrap">시간</th>
-                      <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500">IP</th>
                       <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500">페이지</th>
                       <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500">브라우저</th>
                       <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500">유입</th>
@@ -228,23 +190,7 @@ export default function VisitorLog({ password }: Props) {
                     {filtered.map((e, i) => (
                       <tr key={i} className="hover:bg-gray-50 transition-colors">
                         <td className="px-4 py-2.5 text-gray-500 whitespace-nowrap text-xs">
-                          <span title={new Date(e.ts).toLocaleString("ko-KR")}>
-                            {formatTime(e.ts)}
-                          </span>
-                        </td>
-                        <td className="px-4 py-2.5">
-                          <button
-                            onClick={() => setFilterIp(filterIp === e.ip ? null : e.ip)}
-                            className={`font-mono text-xs px-2 py-0.5 rounded transition-colors ${
-                              filterIp === e.ip
-                                ? "bg-gray-900 text-white"
-                                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                            }`}
-                            title={isLocal(e.ip) ? "로컬(내부) 접속" : e.ip}
-                          >
-                            {isLocal(e.ip) ? "🏠 " : ""}
-                            {e.ip}
-                          </button>
+                          <span title={new Date(e.ts).toLocaleString("ko-KR")}>{formatTime(e.ts)}</span>
                         </td>
                         <td className="px-4 py-2.5">
                           <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
@@ -255,14 +201,10 @@ export default function VisitorLog({ password }: Props) {
                             {PAGE_LABEL[e.page] ?? e.page}
                           </span>
                         </td>
-                        <td className="px-4 py-2.5 text-gray-500 text-xs whitespace-nowrap">
-                          {parseDevice(e.ua)}
-                        </td>
+                        <td className="px-4 py-2.5 text-gray-500 text-xs whitespace-nowrap">{parseDevice(e.ua)}</td>
                         <td className="px-4 py-2.5 text-gray-400 text-xs max-w-[120px] truncate" title={e.ref}>
                           {e.ref ? (
-                            (() => {
-                              try { return new URL(e.ref).hostname; } catch { return e.ref; }
-                            })()
+                            (() => { try { return new URL(e.ref).hostname; } catch { return e.ref; } })()
                           ) : (
                             <span className="text-gray-300">직접</span>
                           )}
