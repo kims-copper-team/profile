@@ -30,7 +30,7 @@ export const CAREER_ENTRIES: CareerEntry[] = [
     role: "연구원",
     category: "Industry",
     startYear: 2018,
-    startMonth: 3,
+    startMonth: 1,
     endYear: 2019,
     endMonth: 12,
     description: [
@@ -47,9 +47,9 @@ export const CAREER_ENTRIES: CareerEntry[] = [
     role: "팀원",
     category: "Startup",
     startYear: 2020,
-    startMonth: 1,
+    startMonth: 11,
     endYear: 2021,
-    endMonth: 6,
+    endMonth: 5,
     description: [
       "생활 수리 서비스 O2O 플랫폼 스타트업 팀원",
       "사업 운영 지원 및 고객 발굴(B2C) 참여",
@@ -64,7 +64,7 @@ export const CAREER_ENTRIES: CareerEntry[] = [
     role: "창업자 / CEO",
     category: "Startup",
     startYear: 2021,
-    startMonth: 7,
+    startMonth: 11,
     endYear: 2025,
     endMonth: 4,
     description: [
@@ -85,7 +85,7 @@ export const CAREER_ENTRIES: CareerEntry[] = [
     role: "창업자",
     category: "Startup",
     startYear: 2023,
-    startMonth: 3,
+    startMonth: 8,
     endYear: 2024,
     endMonth: 9,
     description: [
@@ -103,7 +103,7 @@ export const CAREER_ENTRIES: CareerEntry[] = [
     role: "위촉연구원 (Post-Master Researcher)",
     category: "Research",
     startYear: 2025,
-    startMonth: 3,
+    startMonth: 4,
     endYear: null,
     endMonth: null,
     description: [
