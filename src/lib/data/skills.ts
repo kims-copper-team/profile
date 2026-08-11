@@ -25,7 +25,7 @@ export const SKILLS: Skill[] = [
   { id: "casting",     name: "Casting",        nameKo: "용해 주조",      category: "Processing", usedIn: ["res-cu-ni-si"] },
   { id: "rolling",     name: "Rolling",        nameKo: "압연",            category: "Processing", usedIn: ["res-cu-ni-si", "res-cu-tio2"] },
   { id: "aging",       name: "Aging Treatment",nameKo: "시효 처리",      category: "Processing", usedIn: ["res-cu-ni-si"] },
-  { id: "sps",         name: "SPS (Spark Plasma Sintering)", nameKo: "방전 플라즈마 소결", category: "Processing", usedIn: ["res-tic-skd11"] },
+  { id: "infiltration", name: "Pressure Infiltration", nameKo: "용융가압함침", category: "Processing", usedIn: ["res-tic-skd11"] },
   { id: "cip",         name: "CIP",            nameKo: "냉간 등방압 성형", category: "Processing", usedIn: ["res-cu-tio2"] },
   { id: "sintering",   name: "Sintering",      nameKo: "소결",            category: "Processing", usedIn: ["res-cu-tio2", "res-tic-skd11"] },
 

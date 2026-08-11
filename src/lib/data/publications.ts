@@ -33,8 +33,8 @@ export const PUBLICATIONS: Publication[] = [
   },
   {
     id: "pub-cu-tio2",
-    title: "Mechanical and Electrical Properties of Cu–TiO₂ Composite Fabricated by Powder Metallurgy",
-    titleKo: "분말야금법으로 제조한 Cu–TiO₂ 복합재료의 기계적·전기적 특성",
+    title: "Mechanical and Electrical Properties of Cu–TiO₂ Composite Fabricated by In-situ Internal Oxidation",
+    titleKo: "In-situ 내부산화법으로 제조한 Cu–TiO₂ 복합재료의 기계적·전기적 특성",
     authors: "Ji In Hwang, ...",
     journal: "Metals and Materials International",
     year: null,
@@ -45,8 +45,8 @@ export const PUBLICATIONS: Publication[] = [
   },
   {
     id: "pub-tic-skd11-2018",
-    title: "Mechanical Properties of TiC–SKD11 Tool Steel Composite Fabricated by Spark Plasma Sintering",
-    titleKo: "방전 플라즈마 소결로 제조한 TiC–SKD11 공구강 복합재료의 기계적 특성",
+    title: "Mechanical Properties of TiC–SKD11 Tool Steel Composite Fabricated by Pressure Infiltration",
+    titleKo: "용융가압함침법으로 제조한 TiC–SKD11 공구강 복합재료의 기계적 특성",
     authors: "Ji In Hwang, ...",
     journal: "Metals and Materials International",
     year: 2018,

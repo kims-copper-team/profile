@@ -45,7 +45,7 @@ export const CAREER_ENTRIES: CareerEntry[] = [
     company: "(주)다고쳐",
     companyEn: "DAGOCHYEO",
     role: "팀원",
-    category: "Industry",
+    category: "Startup",
     startYear: 2020,
     startMonth: 1,
     endYear: 2021,
@@ -65,8 +65,8 @@ export const CAREER_ENTRIES: CareerEntry[] = [
     category: "Startup",
     startYear: 2021,
     startMonth: 7,
-    endYear: 2026,
-    endMonth: 3,
+    endYear: 2025,
+    endMonth: 4,
     description: [
       "AI 기반 음향 방출(Acoustic Emission) 균열 감지 기술 창업",
       "딥러닝 음향 신호 분류 모델 개발 (BERT 아키텍처 응용)",
@@ -75,7 +75,6 @@ export const CAREER_ENTRIES: CareerEntry[] = [
     ],
     achievements: [
       "정부 지원 과제 수주 (중소기업부, 과기부)",
-      "투자 유치 성공",
     ],
     lane: 0,
   },
