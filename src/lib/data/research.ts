@@ -51,13 +51,13 @@ export const RESEARCH_PROJECTS: ResearchProject[] = [
   },
   {
     id: "res-tic-skd11",
-    title: "TiC–SKD11 공구강 복합재료 용융가압함침 제조 연구",
+    title: "TiC 강화 SKD11 강 기지 복합재료 뜨임 거동 연구",
     materialSystem: "철계 복합재료",
     objective:
-      "용융가압함침법으로 제조한 TiC 강화 SKD11 공구강 복합재료의 미세조직 및 기계적 특성 평가",
-    keywords: ["복합재료", "공구강", "TiC", "용융가압함침", "함침"],
-    processing: ["TiC 예비성형체 제조", "용융가압함침 (Pressure Infiltration)"],
-    characterization: ["SEM", "XRD", "경도 측정", "굽힘강도"],
+      "가압함침주조로 제조한 TiC 강화 SKD11 강 기지 복합재료의 뜨임 온도에 따른 경도 변화 및 MC 탄화물 재분포 기구 규명",
+    keywords: ["TiC", "강 기지 복합재료", "뜨임", "경도", "가압함침주조"],
+    processing: ["TiC 예비성형체 제조", "가압함침주조 (Pressure Infiltration Casting)"],
+    characterization: ["SEM", "TEM-EDS", "XRD", "경도 측정"],
     publicationId: "pub-tic-skd11-2018",
     status: "Published",
     relatedSkills: ["용융가압함침", "SEM", "XRD", "복합재료", "공구강"],

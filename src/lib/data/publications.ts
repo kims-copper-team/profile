@@ -45,14 +45,14 @@ export const PUBLICATIONS: Publication[] = [
   },
   {
     id: "pub-tic-skd11-2018",
-    title: "Mechanical Properties of TiC–SKD11 Tool Steel Composite Fabricated by Pressure Infiltration",
-    titleKo: "용융가압함침법으로 제조한 TiC–SKD11 공구강 복합재료의 기계적 특성",
-    authors: "Ji In Hwang, ...",
+    title: "Tempering Behavior of TiC-Reinforced SKD11 Steel Matrix Composite",
+    titleKo: "TiC 강화 SKD11 강 기지 복합재료의 뜨임 거동",
+    authors: "Ji-In Hwang · Seong Hoon Kim · Yoon-Uk Heo · Dae Ha Kim · Keum-Cheol Hwang · Dong-Woo Suh",
     journal: "Metals and Materials International",
     year: 2018,
     authorRole: "First",
     status: "Published",
     researchId: "res-tic-skd11",
-    topics: ["복합재료", "공구강", "TiC", "SPS", "소결"],
+    topics: ["TiC", "강 기지 복합재료", "뜨임 거동", "경도", "가압함침주조"],
   },
 ];

@@ -28,7 +28,8 @@ export const SKILLS: Skill[] = [
   { id: "infiltration", name: "Pressure Infiltration", nameKo: "용융가압함침",  category: "Processing", usedIn: ["res-tic-skd11"] },
 
   // Characterization
-  { id: "sem",  name: "SEM",  nameKo: "주사전자현미경", category: "Characterization", usedIn: ["res-cu-ni-si", "res-cu-tio2", "res-tic-skd11"] },
+  { id: "sem",     name: "SEM",     nameKo: "주사전자현미경",  category: "Characterization", usedIn: ["res-cu-ni-si", "res-cu-tio2", "res-tic-skd11"] },
+  { id: "tem-eds", name: "TEM-EDS", nameKo: "투과전자현미경 EDS", category: "Characterization", usedIn: ["res-tic-skd11"] },
   { id: "ebsd", name: "EBSD", nameKo: "결정방위분석",   category: "Characterization", usedIn: ["res-cu-ni-si"] },
   { id: "xrd",  name: "XRD",  nameKo: "X선 회절분석",   category: "Characterization", usedIn: ["res-cu-ni-si", "res-cu-tio2", "res-tic-skd11"] },
   { id: "tem",  name: "TEM",  nameKo: "투과전자현미경", category: "Characterization", usedIn: ["res-cu-ni-si"] },
@@ -37,7 +38,7 @@ export const SKILLS: Skill[] = [
   { id: "tensile",      name: "Tensile Testing",         nameKo: "인장시험",   category: "Properties", usedIn: ["res-cu-ni-si", "res-cu-tio2"] },
   { id: "hardness",     name: "Hardness Testing",         nameKo: "경도 측정",  category: "Properties", usedIn: ["res-cu-ni-si", "res-cu-tio2", "res-tic-skd11"] },
   { id: "conductivity", name: "Electrical Conductivity",  nameKo: "전기전도도", category: "Properties", usedIn: ["res-cu-ni-si", "res-cu-tio2"] },
-  { id: "bending",      name: "Bending Strength",         nameKo: "굽힘강도",   category: "Properties", usedIn: ["res-tic-skd11"] },
+  { id: "tempering",    name: "Tempering",                nameKo: "뜨임 처리",  category: "Processing",  usedIn: ["res-tic-skd11"] },
 
   // Data / AI
   { id: "gpr",       name: "GPR-ARD",    nameKo: "가우시안 프로세스 회귀", category: "Data/AI", usedIn: ["res-cu-ni-si"] },
