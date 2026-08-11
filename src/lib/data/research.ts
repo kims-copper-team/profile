@@ -55,7 +55,7 @@ export const RESEARCH_PROJECTS: ResearchProject[] = [
     materialSystem: "철계 복합재료",
     objective:
       "가압함침주조로 제조한 TiC 강화 SKD11 강 기지 복합재료의 뜨임 온도에 따른 경도 변화 및 MC 탄화물 재분포 기구 규명",
-    keywords: ["TiC", "강 기지 복합재료", "뜨임", "경도", "가압함침주조"],
+    keywords: ["TiC", "강 기지 복합재료", "뜨임 거동", "가압함침주조"],
     processing: ["TiC 예비성형체 제조", "가압함침주조 (Pressure Infiltration Casting)"],
     characterization: ["SEM", "TEM-EDS", "XRD", "경도 측정"],
     publicationId: "pub-tic-skd11-2018",
