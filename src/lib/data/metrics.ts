@@ -8,10 +8,10 @@ export interface DashboardMetric {
 }
 
 export const METRICS: DashboardMetric[] = [
-  { key: "career",     label: "총 경력",       value: "7Y+",  sub: "2018 – 현재",          href: "/career/",       color: "amber" },
-  { key: "research",   label: "연구 경력",      value: "3Y+",  sub: "한국재료연구원 포함",    href: "/research/",     color: "green" },
-  { key: "pubs",       label: "논문",           value: "3",    sub: "1저자 2건, 공동1저자 1건", href: "/publications/", color: "blue" },
-  { key: "startups",   label: "창업",           value: "2",    sub: "SELLWAVE · 빌딩몬",     href: "/entrepreneurship/", color: "purple" },
-  { key: "materials",  label: "재료 시스템",     value: "4+",   sub: "Cu, Fe, TiC 계열",      href: "/research/",     color: "amber" },
-  { key: "current",    label: "현 소속",         value: "KIMS", sub: "한국재료연구원 · 2025–", href: "/profile/",      color: "green" },
+  { key: "materials-exp", label: "재료 개발 실무",  value: "3Y+",  sub: "풍산(2018) · KIMS(2025~)",          href: "/career/",           color: "amber"  },
+  { key: "startup-exp",   label: "창업 경력",        value: "6Y+",  sub: "비중복 2020–2026 · 3개 회사",        href: "/entrepreneurship/", color: "purple" },
+  { key: "pubs",          label: "논문",             value: "3",    sub: "1저자 2건 · 공동1저자 1건",           href: "/publications/",     color: "blue"   },
+  { key: "startups",      label: "창업 기업",         value: "3",    sub: "다고쳐 · SELLWAVE · 빌딩몬",          href: "/entrepreneurship/", color: "purple" },
+  { key: "mat-systems",   label: "재료 시스템",       value: "4+",   sub: "Cu 합금 · Cu 복합 · Fe계 · TiC",     href: "/research/",         color: "amber"  },
+  { key: "current",       label: "현 소속",           value: "KIMS", sub: "한국재료연구원 · 2025–",              href: "/profile/",          color: "green"  },
 ];
