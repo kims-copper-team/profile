@@ -3,215 +3,272 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getResumeData, logVisit, type ResumeData } from "@/lib/supabaseClient";
+import { METRICS } from "@/lib/data/metrics";
+import { PUBLICATIONS } from "@/lib/data/publications";
+import { CAREER_ENTRIES } from "@/lib/data/career";
+import { SKILLS } from "@/lib/data/skills";
 
-const ELEMENTS = [
-  { symbol: "Fe", name: "Iron",      number: 26, color: "#60a5fa" },
-  { symbol: "Ni", name: "Nickel",    number: 28, color: "#f59e0b" },
-  { symbol: "Ti", name: "Titanium",  number: 22, color: "#a78bfa" },
-  { symbol: "Al", name: "Aluminum",  number: 13, color: "#34d399" },
-  { symbol: "Cu", name: "Copper",    number: 29, color: "#fb923c" },
-  { symbol: "Cr", name: "Chromium",  number: 24, color: "#f472b6" },
-];
+const COLOR: Record<string, { bg: string; text: string; border: string }> = {
+  amber:  { bg: "#FFFBEB", text: "#D97706", border: "#FDE68A" },
+  green:  { bg: "#ECFDF5", text: "#059669", border: "#6EE7B7" },
+  blue:   { bg: "#EFF6FF", text: "#2563EB", border: "#BFDBFE" },
+  purple: { bg: "#F5F3FF", text: "#7C3AED", border: "#DDD6FE" },
+};
 
-function ElementCard({ symbol, name, number, color }: { symbol: string; name: string; number: number; color: string }) {
+const ROLE_COLOR = {
+  First:      { bg: "#EFF6FF", text: "#1E40AF" },
+  "Co-First": { bg: "#ECFDF5", text: "#065F46" },
+  "Co-Author":{ bg: "#F5F3FF", text: "#5B21B6" },
+};
+
+const STATUS_COLOR: Record<string, { bg: string; text: string }> = {
+  Published:      { bg: "#ECFDF5", text: "#065F46" },
+  Submitted:      { bg: "#FFFBEB", text: "#92400E" },
+  "In Preparation": { bg: "#F5F3FF", text: "#5B21B6" },
+};
+
+// Mini Gantt for dashboard
+const CHART_START = 2018;
+const CHART_END = 2027;
+const TOTAL_YEARS = CHART_END - CHART_START;
+
+function MiniGantt() {
+  const VW = 600;
+  const ML = 32;
+  const IW = VW - ML - 16;
+  const BAR_H = 14;
+  const AXIS_Y = 110;
+
+  const yearToX = (y: number, m = 1) =>
+    ML + ((y - CHART_START + (m - 1) / 12) / TOTAL_YEARS) * IW;
+
+  const catColor = {
+    Industry: "#D97706",
+    Startup:  "#7C3AED",
+    Research: "#059669",
+  };
+
+  const years = Array.from({ length: TOTAL_YEARS + 1 }, (_, i) => CHART_START + i);
+
   return (
-    <div
-      className="w-[72px] h-[72px] rounded-lg flex flex-col items-center justify-center relative cursor-default select-none transition-all duration-200 hover:scale-105"
-      style={{
-        background: `${color}10`,
-        border: `1px solid ${color}30`,
-        boxShadow: `0 0 12px ${color}10`,
-      }}
-    >
-      <span className="absolute top-1.5 left-2 text-[9px] font-mono" style={{ color: `${color}80` }}>{number}</span>
-      <span className="text-xl font-bold" style={{ color }}>{symbol}</span>
-      <span className="text-[9px] mt-0.5" style={{ color: `${color}80` }}>{name}</span>
-    </div>
-  );
-}
+    <svg viewBox={`0 0 ${VW} 130`} style={{ width: "100%", display: "block" }}>
+      {/* grid */}
+      {years.map((y) => (
+        <line key={y}
+          x1={yearToX(y)} y1={10} x2={yearToX(y)} y2={AXIS_Y - 2}
+          stroke="#E2E8F4" strokeWidth={1} />
+      ))}
 
-function HexGrid() {
-  return (
-    <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg" style={{ opacity: 0.03 }}>
-      <defs>
-        <pattern id="hexgrid" x="0" y="0" width="60" height="104" patternUnits="userSpaceOnUse">
-          <polygon points="30,2 58,17 58,47 30,62 2,47 2,17" fill="none" stroke="#d97706" strokeWidth="1" />
-          <polygon points="30,54 58,69 58,99 30,114 2,99 2,69" fill="none" stroke="#d97706" strokeWidth="1" />
-          <polygon points="60,28 88,43 88,73 60,88 32,73 32,43" fill="none" stroke="#d97706" strokeWidth="1" />
-        </pattern>
-      </defs>
-      <rect width="100%" height="100%" fill="url(#hexgrid)" />
+      {/* bars */}
+      {CAREER_ENTRIES.map((e) => {
+        const x1 = yearToX(e.startYear, e.startMonth);
+        const x2 = yearToX(e.endYear ?? 2027, e.endMonth ?? 1);
+        const y = 40 + e.lane * (BAR_H + 6);
+        const col = catColor[e.category];
+        return (
+          <g key={e.id}>
+            <rect x={x1} y={y} width={x2 - x1} height={BAR_H} rx={3} fill={col} opacity={0.85} />
+            {x2 - x1 > 30 && (
+              <text x={x1 + 4} y={y + 10} fontSize={8} fill="white" fontWeight="600">
+                {e.company.replace("주식회사", "").replace("(주)", "").trim()}
+              </text>
+            )}
+          </g>
+        );
+      })}
+
+      {/* axis */}
+      <line x1={ML} y1={AXIS_Y} x2={VW - 16} y2={AXIS_Y} stroke="#CBD5E1" strokeWidth={1.5} />
+      {years.filter((y) => y % 2 === 0).map((y) => (
+        <g key={y}>
+          <line x1={yearToX(y)} y1={AXIS_Y} x2={yearToX(y)} y2={AXIS_Y + 4} stroke="#94A3B8" strokeWidth={1} />
+          <text x={yearToX(y)} y={AXIS_Y + 13} textAnchor="middle" fontSize={8} fill="#94A3B8" fontFamily="monospace">
+            {String(y).slice(2)}
+          </text>
+        </g>
+      ))}
     </svg>
   );
 }
 
-export default function Home() {
+export default function DashboardPage() {
   const [personal, setPersonal] = useState<ResumeData["personal"] | null>(null);
-  const [blink, setBlink] = useState(true);
 
   useEffect(() => {
     logVisit("/");
     getResumeData().then((d) => setPersonal(d.personal));
-    const t = setInterval(() => setBlink((v) => !v), 900);
-    return () => clearInterval(t);
   }, []);
 
-  if (!personal) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-[#0d1117]">
-        <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-[11px] font-mono tracking-[0.3em] text-amber-500/60">LOADING PROFILE...</p>
-      </div>
-    );
-  }
+  const topSkills = SKILLS.filter((s) => s.usedIn.length > 0).slice(0, 12);
 
   return (
-    <div className="min-h-screen bg-[#0d1117] text-white relative overflow-hidden">
-      <HexGrid />
+    <div className="max-w-[1100px] mx-auto px-5 sm:px-8 py-8 space-y-6">
 
-      {/* Ambient glow */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full pointer-events-none"
-           style={{ background: "radial-gradient(circle, rgba(217,119,6,0.06) 0%, transparent 70%)" }} />
-      <div className="absolute bottom-0 right-1/4 w-80 h-80 rounded-full pointer-events-none"
-           style={{ background: "radial-gradient(circle, rgba(96,165,250,0.04) 0%, transparent 70%)" }} />
-
-      {/* Status bar */}
-      <div className="relative border-b border-white/[0.06] px-4 sm:px-8 py-2.5 flex items-center justify-between">
-        <div className="flex items-center gap-3 text-[11px] font-mono text-gray-500">
-          <span className="text-amber-500/80 tracking-[0.2em]">MATERIALS LAB</span>
-          <span className="text-white/10">│</span>
-          <span>PORTFOLIO</span>
+      {/* ── Profile strip ── */}
+      <div
+        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-xl p-5 sm:p-6"
+        style={{ background: "#fff", border: "1px solid #E2E8F4" }}
+      >
+        <div className="flex items-center gap-4">
+          <div
+            className="w-14 h-14 rounded-full flex items-center justify-center text-lg font-black shrink-0"
+            style={{ background: "#DBEAFE", color: "#1D4ED8" }}
+          >
+            {personal ? (personal.nameEn?.slice(0, 2).toUpperCase() || "JH") : "JH"}
+          </div>
+          <div>
+            <h1 className="text-xl font-black tracking-tight" style={{ letterSpacing: "-0.03em" }}>
+              {personal?.name || "황지인"}
+            </h1>
+            {personal?.nameEn && (
+              <p className="text-xs font-mono text-slate-400 tracking-widest">{personal.nameEn.toUpperCase()}</p>
+            )}
+            <p className="text-sm text-slate-500 mt-0.5">{personal?.title || "재료 연구원 · 한국재료연구원 · Cu 합금 / AI-assisted Materials"}</p>
+          </div>
         </div>
-        <div className="flex items-center gap-2 text-[11px] font-mono">
-          <span className={`w-1.5 h-1.5 rounded-full transition-opacity duration-300 bg-green-400 ${blink ? "opacity-100" : "opacity-40"}`} />
-          <span className="text-green-400/80">ONLINE</span>
+        <div className="flex gap-2 shrink-0">
+          <Link
+            href="/cv/"
+            className="px-4 py-2 rounded-lg text-[13px] font-semibold transition-colors"
+            style={{ background: "#EFF6FF", color: "#2563EB", border: "1px solid #BFDBFE" }}
+          >
+            이력서 →
+          </Link>
+          <Link
+            href="/career/"
+            className="px-4 py-2 rounded-lg text-[13px] font-medium text-slate-500 hover:text-slate-800 transition-colors"
+            style={{ border: "1px solid #E2E8F4", background: "#F8FAFC" }}
+          >
+            경력 →
+          </Link>
         </div>
       </div>
 
-      <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
-
-        {/* Hero */}
-        <div className="mb-12">
-          <p className="text-[11px] font-mono text-amber-500/60 tracking-[0.35em] mb-4">
-            ◆ RESEARCHER PROFILE
-          </p>
-          <h1
-            className="text-5xl sm:text-7xl font-bold tracking-tight mb-3 leading-none"
-            style={{ textShadow: "0 0 60px rgba(217,119,6,0.25)" }}
-          >
-            {personal.name || "이름 없음"}
-          </h1>
-          {personal.nameEn && (
-            <p className="text-gray-500 font-mono text-sm mb-4 tracking-widest">{personal.nameEn.toUpperCase()}</p>
-          )}
-          <div className="flex items-center gap-3">
-            <div className="h-px w-12 bg-gradient-to-r from-amber-500 to-transparent" />
-            <p className="text-amber-400 text-base sm:text-lg font-medium">{personal.title}</p>
-          </div>
+      {/* ── Metric cards ── */}
+      <div>
+        <p className="text-[10px] font-bold tracking-[0.12em] uppercase text-slate-400 mb-3">Career Metrics</p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          {METRICS.map((m) => {
+            const c = COLOR[m.color ?? "blue"];
+            return (
+              <Link
+                key={m.key}
+                href={m.href}
+                className="rounded-xl p-4 hover:shadow-md transition-shadow"
+                style={{ background: "#fff", border: "1px solid #E2E8F4" }}
+              >
+                <p className="text-[9px] font-bold tracking-[0.1em] uppercase mb-1.5" style={{ color: c.text }}>{m.label}</p>
+                <p className="text-2xl font-black tracking-tight" style={{ color: "#0F172A" }}>{m.value}</p>
+                <p className="text-[10px] text-slate-400 mt-1 leading-tight">{m.sub}</p>
+              </Link>
+            );
+          })}
         </div>
+      </div>
 
-        {/* Main grid */}
-        <div className="grid lg:grid-cols-3 gap-5 mb-5">
+      {/* ── Timeline + Publications ── */}
+      <div className="grid lg:grid-cols-5 gap-4">
 
-          {/* Overview + Contact */}
-          <div className="lg:col-span-2 rounded-xl p-6 sm:p-7"
-               style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)" }}>
-            <p className="text-[10px] font-mono text-gray-600 tracking-[0.25em] mb-4">// OVERVIEW</p>
-            {personal.summary ? (
-              <p className="text-gray-300 leading-relaxed text-sm">{personal.summary}</p>
-            ) : (
-              <p className="text-gray-600 text-sm italic">어드민에서 자기소개를 입력하세요.</p>
-            )}
-
-            <div className="mt-6 pt-5" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-              <p className="text-[10px] font-mono text-gray-600 tracking-[0.25em] mb-4">// CONTACT</p>
-              <div className="grid sm:grid-cols-2 gap-2">
-                {personal.email && (
-                  <a href={`mailto:${personal.email}`}
-                     className="flex items-center gap-2.5 text-sm text-gray-400 hover:text-amber-400 transition-colors group">
-                    <span className="font-mono text-amber-600/50 group-hover:text-amber-500 text-xs shrink-0">→</span>
-                    {personal.email}
-                  </a>
-                )}
-                {personal.phone && (
-                  <div className="flex items-center gap-2.5 text-sm text-gray-400">
-                    <span className="font-mono text-amber-600/50 text-xs shrink-0">→</span>
-                    {personal.phone}
-                  </div>
-                )}
-                {personal.location && (
-                  <div className="flex items-center gap-2.5 text-sm text-gray-400">
-                    <span className="font-mono text-amber-600/50 text-xs shrink-0">→</span>
-                    {personal.location}
-                  </div>
-                )}
-                {personal.github && (
-                  <a href={personal.github} target="_blank" rel="noreferrer"
-                     className="flex items-center gap-2.5 text-sm text-gray-400 hover:text-amber-400 transition-colors group">
-                    <span className="font-mono text-amber-600/50 group-hover:text-amber-500 text-xs shrink-0">→</span>
-                    GitHub
-                  </a>
-                )}
-              </div>
-            </div>
+        {/* Career mini timeline */}
+        <div
+          className="lg:col-span-3 rounded-xl p-5"
+          style={{ background: "#fff", border: "1px solid #E2E8F4" }}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-[10px] font-bold tracking-[0.12em] uppercase text-slate-400">Career Timeline</p>
+            <Link href="/career/" className="text-[11px] font-medium text-blue-500 hover:text-blue-700">전체 보기 →</Link>
           </div>
-
-          {/* Stat readouts */}
-          <div className="flex flex-row lg:flex-col gap-4">
+          <MiniGantt />
+          <div className="flex gap-4 mt-3">
             {[
-              { key: "CAREER",   value: "5Y+",                   sub: "총 경력" },
-              { key: "PROJECTS", value: "10+",                   sub: "참여 프로젝트" },
-              { key: "LOCATION", value: personal.location || "—", sub: "현재 위치" },
-            ].map((s) => (
-              <div key={s.key}
-                   className="flex-1 rounded-xl px-5 py-4"
-                   style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)" }}>
-                <p className="text-[9px] font-mono tracking-[0.2em] mb-1.5" style={{ color: "rgba(217,119,6,0.5)" }}>
-                  {s.key}
-                </p>
-                <p className="text-2xl sm:text-3xl font-bold"
-                   style={{ textShadow: "0 0 20px rgba(217,119,6,0.3)" }}>
-                  {s.value}
-                </p>
-                <p className="text-[11px] text-gray-600 mt-1">{s.sub}</p>
+              { label: "Industry", color: "#D97706" },
+              { label: "Startup",  color: "#7C3AED" },
+              { label: "Research", color: "#059669" },
+            ].map((l) => (
+              <div key={l.label} className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-sm" style={{ background: l.color }} />
+                <span className="text-[10px] text-slate-400">{l.label}</span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Key Elements */}
-        <div className="rounded-xl p-6 mb-8"
-             style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)" }}>
-          <p className="text-[10px] font-mono text-gray-600 tracking-[0.25em] mb-5">// KEY ELEMENTS</p>
-          <div className="flex flex-wrap gap-3">
-            {ELEMENTS.map((el) => <ElementCard key={el.symbol} {...el} />)}
+        {/* Recent publications */}
+        <div
+          className="lg:col-span-2 rounded-xl p-5"
+          style={{ background: "#fff", border: "1px solid #E2E8F4" }}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-[10px] font-bold tracking-[0.12em] uppercase text-slate-400">Recent Publications</p>
+            <Link href="/publications/" className="text-[11px] font-medium text-blue-500 hover:text-blue-700">전체 →</Link>
+          </div>
+          <div className="space-y-4">
+            {PUBLICATIONS.map((pub) => {
+              const rc = ROLE_COLOR[pub.authorRole];
+              const sc = STATUS_COLOR[pub.status];
+              return (
+                <div key={pub.id} className="group">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded" style={{ background: rc.bg, color: rc.text }}>
+                      {pub.authorRole === "Co-First" ? "공동1저자" : pub.authorRole === "First" ? "1저자" : "공저자"}
+                    </span>
+                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded" style={{ background: sc.bg, color: sc.text }}>
+                      {pub.status === "Published" ? "게재" : pub.status === "Submitted" ? "심사중" : "준비중"}
+                    </span>
+                  </div>
+                  <p className="text-[12px] font-semibold leading-snug line-clamp-2 text-slate-700 group-hover:text-blue-700 transition-colors">
+                    {pub.titleKo || pub.title}
+                  </p>
+                  <p className="text-[10px] text-slate-400 mt-0.5 font-mono">
+                    {pub.journal}{pub.year ? ` · ${pub.year}` : ""}
+                  </p>
+                </div>
+              );
+            })}
           </div>
         </div>
-
-        {/* CTA */}
-        <div className="flex flex-wrap gap-3">
-          <Link
-            href="/resume/"
-            className="px-7 py-3 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-[1.02]"
-            style={{
-              border: "1px solid rgba(217,119,6,0.5)",
-              color: "#f59e0b",
-              background: "rgba(217,119,6,0.07)",
-              boxShadow: "0 0 20px rgba(217,119,6,0.08)",
-            }}
-          >
-            이력서 열람 →
-          </Link>
-          <Link
-            href="/career/"
-            className="px-7 py-3 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition-all duration-200"
-            style={{ border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.02)" }}
-          >
-            경력기술서 열람 →
-          </Link>
-        </div>
-
       </div>
+
+      {/* ── Skills summary ── */}
+      <div
+        className="rounded-xl p-5"
+        style={{ background: "#fff", border: "1px solid #E2E8F4" }}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-[10px] font-bold tracking-[0.12em] uppercase text-slate-400">Core Skills</p>
+          <Link href="/skills/" className="text-[11px] font-medium text-blue-500 hover:text-blue-700">전체 →</Link>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {topSkills.map((s) => {
+            const catColors: Record<string, string> = {
+              Materials:        "#FFFBEB",
+              Processing:       "#EFF6FF",
+              Characterization: "#ECFDF5",
+              Properties:       "#F5F3FF",
+              "Data/AI":        "#FDF4FF",
+              Business:         "#F0F9FF",
+            };
+            const catText: Record<string, string> = {
+              Materials:        "#D97706",
+              Processing:       "#2563EB",
+              Characterization: "#059669",
+              Properties:       "#7C3AED",
+              "Data/AI":        "#9333EA",
+              Business:         "#0891B2",
+            };
+            return (
+              <span
+                key={s.id}
+                className="px-2.5 py-1 rounded-full text-[11px] font-medium"
+                style={{ background: catColors[s.category], color: catText[s.category] }}
+              >
+                {s.nameKo || s.name}
+              </span>
+            );
+          })}
+        </div>
+      </div>
+
     </div>
   );
 }
