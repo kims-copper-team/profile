@@ -13,8 +13,7 @@ const LABELS: Record<string, string> = {
   "/ai/":               "AI & Automation",
   "/skills/":           "Skills",
   "/applications/":     "Applications",
-  "/cv/":               "CV / Resume",
-  "/contact/":          "Contact",
+"/contact/":          "Contact",
   "/admin/":            "Admin",
 };
 

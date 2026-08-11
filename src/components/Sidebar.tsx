@@ -17,7 +17,6 @@ const NAV = [
 ];
 
 const FOOTER = [
-  { href: "/cv/",      label: "CV / Resume" },
   { href: "/contact/", label: "Contact" },
 ];
 
