@@ -34,7 +34,7 @@ export const CAREER_ENTRIES: CareerEntry[] = [
     endYear: 2019,
     endMonth: 12,
     description: [
-      "구리 합금 소재 연구개발 (Cu-Cr, Cu-Zr 계열)",
+      "구리 합금 소재 연구개발 (Cu-Cr, Cu-Zr, Cu-Ni-Si-Co 계열)",
       "압연 공정 최적화 연구",
       "재료 물성 평가 (인장강도, 경도, 전기전도도)",
     ],
