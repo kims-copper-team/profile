@@ -38,7 +38,7 @@ export const PUBLICATIONS: Publication[] = [
     researchId: "res-cu-ni-si",
     topics: ["Cu–Ni–Si 합금", "용체화 처리", "냉간 압연", "가공 경화", "석출 경화"],
     indexed: "SCIE",
-    impactFactor: 4.8,
+    impactFactor: 4.9,
     ifYear: 2023,
   },
   {
@@ -53,7 +53,7 @@ export const PUBLICATIONS: Publication[] = [
     researchId: "res-cu-tio2",
     topics: ["Cu 복합재료", "내부산화", "TiO₂", "전기전도도"],
     indexed: "SCIE",
-    impactFactor: 4.9,
+    impactFactor: 4.5,
     ifYear: 2023,
   },
   {
@@ -85,7 +85,7 @@ export const PUBLICATIONS: Publication[] = [
     researchId: "res-tic-skd11",
     topics: ["TiC", "강 기지 복합재료", "템퍼링 거동", "경도", "가압함침주조"],
     indexed: "SCIE",
-    impactFactor: 4.9,
+    impactFactor: 4.5,
     ifYear: 2023,
   },
 ];
