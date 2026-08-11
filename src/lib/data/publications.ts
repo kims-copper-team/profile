@@ -1,5 +1,6 @@
 export type AuthorRole = "First" | "Co-First" | "Co-Author";
 export type PubStatus = "Published" | "Submitted" | "In Preparation";
+export type JournalIndex = "SCI" | "SCIE" | "SCOPUS";
 
 export interface Publication {
   id: string;
@@ -15,6 +16,9 @@ export interface Publication {
   status: PubStatus;
   researchId?: string;
   topics: string[];
+  indexed?: JournalIndex;
+  impactFactor?: number;
+  ifYear?: number;
 }
 
 export const PUBLICATIONS: Publication[] = [
@@ -33,6 +37,9 @@ export const PUBLICATIONS: Publication[] = [
     status: "Published",
     researchId: "res-cu-ni-si",
     topics: ["Cu–Ni–Si 합금", "용체화 처리", "냉간 압연", "가공 경화", "석출 경화"],
+    indexed: "SCIE",
+    impactFactor: 3.4,
+    ifYear: 2023,
   },
   {
     id: "pub-cu-tio2",
@@ -45,6 +52,9 @@ export const PUBLICATIONS: Publication[] = [
     status: "Submitted",
     researchId: "res-cu-tio2",
     topics: ["Cu 복합재료", "내부산화", "TiO₂", "전기전도도"],
+    indexed: "SCIE",
+    impactFactor: 3.5,
+    ifYear: 2023,
   },
   {
     id: "pub-brass-2026",
@@ -59,6 +69,9 @@ export const PUBLICATIONS: Publication[] = [
     authorRole: "Co-Author",
     status: "Published",
     topics: ["Cu-Zn 황동", "탈아연화", "탈합금", "저압 산화", "기공 형성"],
+    indexed: "SCIE",
+    impactFactor: 5.8,
+    ifYear: 2023,
   },
   {
     id: "pub-tic-skd11-2018",
@@ -71,5 +84,8 @@ export const PUBLICATIONS: Publication[] = [
     status: "Published",
     researchId: "res-tic-skd11",
     topics: ["TiC", "강 기지 복합재료", "템퍼링 거동", "경도", "가압함침주조"],
+    indexed: "SCIE",
+    impactFactor: 3.5,
+    ifYear: 2023,
   },
 ];
