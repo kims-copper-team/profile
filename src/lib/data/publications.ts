@@ -22,7 +22,7 @@ export const PUBLICATIONS: Publication[] = [
     id: "pub-cu-ni-si-2026",
     title:
       "Effect of solution heat treatment temperature on work hardening and aging behavior of Cu–Ni–Si–Co–Cr–Sn alloy",
-    titleKo: "Cu–Ni–Si–Co–Cr–Sn 합금의 고용화 처리 온도가 가공 경화 및 시효 거동에 미치는 영향",
+    titleKo: "Cu–Ni–Si–Co–Cr–Sn 합금의 용체화 처리 온도가 가공 경화 및 시효 거동에 미치는 영향",
     authors: "Ji In Hwang · Hyun Woo Jeong · Munsu Choi · Eun-Ae Choi · Seung Zeon Han",
     journal: "Materials Today Communications",
     year: 2026,
@@ -32,7 +32,7 @@ export const PUBLICATIONS: Publication[] = [
     authorRole: "First",
     status: "Published",
     researchId: "res-cu-ni-si",
-    topics: ["Cu–Ni–Si 합금", "고용화 처리", "냉간 압연", "가공 경화", "석출 경화"],
+    topics: ["Cu–Ni–Si 합금", "용체화 처리", "냉간 압연", "가공 경화", "석출 경화"],
   },
   {
     id: "pub-cu-tio2",
@@ -63,13 +63,13 @@ export const PUBLICATIONS: Publication[] = [
   {
     id: "pub-tic-skd11-2018",
     title: "Tempering Behavior of TiC-Reinforced SKD11 Steel Matrix Composite",
-    titleKo: "TiC 강화 SKD11 강 기지 복합재료의 뜨임 거동",
+    titleKo: "TiC 강화 SKD11 강 기지 복합재료의 템퍼링 거동",
     authors: "Ji-In Hwang · Seong Hoon Kim · Yoon-Uk Heo · Dae Ha Kim · Keum-Cheol Hwang · Dong-Woo Suh",
     journal: "Metals and Materials International",
     year: 2018,
     authorRole: "First",
     status: "Published",
     researchId: "res-tic-skd11",
-    topics: ["TiC", "강 기지 복합재료", "뜨임 거동", "경도", "가압함침주조"],
+    topics: ["TiC", "강 기지 복합재료", "템퍼링 거동", "경도", "가압함침주조"],
   },
 ];

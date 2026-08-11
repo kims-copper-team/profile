@@ -24,7 +24,7 @@ export const SKILLS: Skill[] = [
   { id: "casting",      name: "Casting",              nameKo: "용해 주조",      category: "Processing", usedIn: ["res-cu-ni-si", "res-cu-tio2"] },
   { id: "cold-rolling", name: "Cold Rolling",         nameKo: "냉간 압연",      category: "Processing", usedIn: ["res-cu-ni-si"] },
   { id: "rolling",      name: "Rolling",              nameKo: "압연",           category: "Processing", usedIn: ["res-cu-tio2"] },
-  { id: "sht",          name: "Solution Heat Treatment", nameKo: "고용화 처리", category: "Processing", usedIn: ["res-cu-ni-si"] },
+  { id: "sht",          name: "Solution Heat Treatment", nameKo: "용체화 처리", category: "Processing", usedIn: ["res-cu-ni-si"] },
   { id: "aging",        name: "Aging Treatment",      nameKo: "시효 처리",      category: "Processing", usedIn: ["res-cu-ni-si"] },
   { id: "int-ox",       name: "Internal Oxidation",   nameKo: "내부산화",       category: "Processing", usedIn: ["res-cu-tio2"] },
   { id: "infiltration", name: "Pressure Infiltration", nameKo: "용융가압함침",  category: "Processing", usedIn: ["res-tic-skd11"] },
