@@ -21,15 +21,18 @@ export const PUBLICATIONS: Publication[] = [
   {
     id: "pub-cu-ni-si-2026",
     title:
-      "Microstructure and Mechanical Properties of Cu–Ni–Si–Co–Cr–Sn Alloy with Aging Treatment",
-    titleKo: "시효 처리에 따른 Cu–Ni–Si–Co–Cr–Sn 합금의 미세조직 및 기계적 특성",
-    authors: "Ji In Hwang, ...",
+      "Effect of solution heat treatment temperature on work hardening and aging behavior of Cu–Ni–Si–Co–Cr–Sn alloy",
+    titleKo: "Cu–Ni–Si–Co–Cr–Sn 합금의 고용화 처리 온도가 가공 경화 및 시효 거동에 미치는 영향",
+    authors: "Ji In Hwang · Hyun Woo Jeong · Munsu Choi · Eun-Ae Choi · Seung Zeon Han",
     journal: "Materials Today Communications",
     year: 2026,
+    volume: "53",
+    pages: "115461",
+    doi: "10.1016/j.mtcomm.2026.115461",
     authorRole: "First",
     status: "Published",
     researchId: "res-cu-ni-si",
-    topics: ["Cu 합금", "석출 강화", "시효 처리", "EBSD", "기계적 특성"],
+    topics: ["Cu–Ni–Si 합금", "고용화 처리", "냉간 압연", "가공 경화", "석출 경화"],
   },
   {
     id: "pub-cu-tio2",

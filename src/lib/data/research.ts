@@ -19,15 +19,15 @@ export interface ResearchProject {
 export const RESEARCH_PROJECTS: ResearchProject[] = [
   {
     id: "res-cu-ni-si",
-    title: "Cu–Ni–Si–Co–Cr–Sn 합금 석출 강화 연구",
+    title: "Cu–Ni–Si–Co–Cr–Sn 합금 고용화 처리 및 시효 거동 연구",
     materialSystem: "Cu 합금계",
     objective:
-      "다원계 Cu 합금의 시효 처리 조건별 석출물 형성 기구와 강도–전도도 trade-off 최적화",
-    keywords: ["Cu 합금", "석출 강화", "시효 처리", "강도", "전기전도도"],
-    processing: ["용해 주조", "고온 압연", "고용화 처리", "시효 처리"],
+      "고용화 처리 온도가 Cu–Ni–Si–Co–Cr–Sn 합금의 냉간 압연 가공 경화 및 시효 거동에 미치는 영향 규명",
+    keywords: ["Cu–Ni–Si 합금", "고용화 처리", "냉간 압연", "가공 경화", "석출 경화"],
+    processing: ["용해 주조", "고용화 처리", "냉간 압연", "시효 처리"],
     characterization: ["SEM", "EBSD", "XRD", "TEM", "인장시험", "경도 측정", "전기전도도"],
     keyFindings:
-      "최적 시효 조건에서 δ-Ni₂Si 석출물 분포 제어로 고강도(≥700 MPa)·고전도(≥40 %IACS) 동시 달성",
+      "고용화 처리 온도에 따른 가공 경화 거동 및 시효 후 석출물 분포 차이 규명",
     publicationId: "pub-cu-ni-si-2026",
     status: "Published",
     relatedSkills: ["SEM", "EBSD", "XRD", "TEM", "Cu 합금", "석출 강화", "시효 처리"],
