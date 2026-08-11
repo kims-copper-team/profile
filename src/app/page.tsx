@@ -4,69 +4,213 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getResumeData, logVisit, type ResumeData } from "@/lib/supabaseClient";
 
+const ELEMENTS = [
+  { symbol: "Fe", name: "Iron",      number: 26, color: "#60a5fa" },
+  { symbol: "Ni", name: "Nickel",    number: 28, color: "#f59e0b" },
+  { symbol: "Ti", name: "Titanium",  number: 22, color: "#a78bfa" },
+  { symbol: "Al", name: "Aluminum",  number: 13, color: "#34d399" },
+  { symbol: "Cu", name: "Copper",    number: 29, color: "#fb923c" },
+  { symbol: "Cr", name: "Chromium",  number: 24, color: "#f472b6" },
+];
+
+function ElementCard({ symbol, name, number, color }: { symbol: string; name: string; number: number; color: string }) {
+  return (
+    <div
+      className="w-[72px] h-[72px] rounded-lg flex flex-col items-center justify-center relative cursor-default select-none transition-all duration-200 hover:scale-105"
+      style={{
+        background: `${color}10`,
+        border: `1px solid ${color}30`,
+        boxShadow: `0 0 12px ${color}10`,
+      }}
+    >
+      <span className="absolute top-1.5 left-2 text-[9px] font-mono" style={{ color: `${color}80` }}>{number}</span>
+      <span className="text-xl font-bold" style={{ color }}>{symbol}</span>
+      <span className="text-[9px] mt-0.5" style={{ color: `${color}80` }}>{name}</span>
+    </div>
+  );
+}
+
+function HexGrid() {
+  return (
+    <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg" style={{ opacity: 0.03 }}>
+      <defs>
+        <pattern id="hexgrid" x="0" y="0" width="60" height="104" patternUnits="userSpaceOnUse">
+          <polygon points="30,2 58,17 58,47 30,62 2,47 2,17" fill="none" stroke="#d97706" strokeWidth="1" />
+          <polygon points="30,54 58,69 58,99 30,114 2,99 2,69" fill="none" stroke="#d97706" strokeWidth="1" />
+          <polygon points="60,28 88,43 88,73 60,88 32,73 32,43" fill="none" stroke="#d97706" strokeWidth="1" />
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#hexgrid)" />
+    </svg>
+  );
+}
+
 export default function Home() {
   const [personal, setPersonal] = useState<ResumeData["personal"] | null>(null);
+  const [blink, setBlink] = useState(true);
 
   useEffect(() => {
     logVisit("/");
     getResumeData().then((d) => setPersonal(d.personal));
+    const t = setInterval(() => setBlink((v) => !v), 900);
+    return () => clearInterval(t);
   }, []);
 
   if (!personal) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin" />
+      <div className="flex flex-col items-center justify-center min-h-screen bg-[#0d1117]">
+        <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin mb-4" />
+        <p className="text-[11px] font-mono tracking-[0.3em] text-amber-500/60">LOADING PROFILE...</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-      <div className="flex flex-col items-center text-center gap-6 mb-20">
-        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white text-3xl font-bold select-none">
-          {personal.name ? personal.name[0] : "?"}
-        </div>
-        <div>
-          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-2">{personal.name || "이름 없음"}</h1>
-          <p className="text-xl text-gray-500 font-medium">{personal.title}</p>
-        </div>
-        {personal.summary && <p className="max-w-xl text-gray-600 leading-relaxed">{personal.summary}</p>}
+    <div className="min-h-screen bg-[#0d1117] text-white relative overflow-hidden">
+      <HexGrid />
 
-        <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-gray-500">
-          {personal.email && (
-            <a href={`mailto:${personal.email}`} className="hover:text-gray-900 transition-colors flex items-center gap-1">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-              {personal.email}
-            </a>
-          )}
-          {personal.phone && <><span className="text-gray-300">|</span><span>{personal.phone}</span></>}
-          {personal.github && (
-            <><span className="text-gray-300">|</span>
-            <a href={personal.github} target="_blank" rel="noreferrer" className="hover:text-gray-900 transition-colors flex items-center gap-1">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" /></svg>
-              GitHub
-            </a></>
-          )}
-        </div>
+      {/* Ambient glow */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full pointer-events-none"
+           style={{ background: "radial-gradient(circle, rgba(217,119,6,0.06) 0%, transparent 70%)" }} />
+      <div className="absolute bottom-0 right-1/4 w-80 h-80 rounded-full pointer-events-none"
+           style={{ background: "radial-gradient(circle, rgba(96,165,250,0.04) 0%, transparent 70%)" }} />
 
-        <div className="flex flex-wrap justify-center gap-3 mt-2">
-          <Link href="/resume/" className="px-6 py-2.5 rounded-lg bg-gray-900 text-white font-medium hover:bg-gray-700 transition-colors">이력서 보기</Link>
-          <Link href="/career/" className="px-6 py-2.5 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-100 transition-colors">경력기술서 보기</Link>
+      {/* Status bar */}
+      <div className="relative border-b border-white/[0.06] px-4 sm:px-8 py-2.5 flex items-center justify-between">
+        <div className="flex items-center gap-3 text-[11px] font-mono text-gray-500">
+          <span className="text-amber-500/80 tracking-[0.2em]">MATERIALS LAB</span>
+          <span className="text-white/10">│</span>
+          <span>PORTFOLIO</span>
+        </div>
+        <div className="flex items-center gap-2 text-[11px] font-mono">
+          <span className={`w-1.5 h-1.5 rounded-full transition-opacity duration-300 bg-green-400 ${blink ? "opacity-100" : "opacity-40"}`} />
+          <span className="text-green-400/80">ONLINE</span>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {[
-          { label: "총 경력", value: "5년+" },
-          { label: "참여 프로젝트", value: "10+" },
-          { label: "주 사용 언어", value: "TypeScript" },
-          { label: "위치", value: personal.location || "-" },
-        ].map((stat) => (
-          <div key={stat.label} className="bg-white rounded-xl border border-gray-200 p-5 text-center">
-            <div className="text-2xl font-bold text-gray-900 mb-1">{stat.value}</div>
-            <div className="text-sm text-gray-500">{stat.label}</div>
+      <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+
+        {/* Hero */}
+        <div className="mb-12">
+          <p className="text-[11px] font-mono text-amber-500/60 tracking-[0.35em] mb-4">
+            ◆ RESEARCHER PROFILE
+          </p>
+          <h1
+            className="text-5xl sm:text-7xl font-bold tracking-tight mb-3 leading-none"
+            style={{ textShadow: "0 0 60px rgba(217,119,6,0.25)" }}
+          >
+            {personal.name || "이름 없음"}
+          </h1>
+          {personal.nameEn && (
+            <p className="text-gray-500 font-mono text-sm mb-4 tracking-widest">{personal.nameEn.toUpperCase()}</p>
+          )}
+          <div className="flex items-center gap-3">
+            <div className="h-px w-12 bg-gradient-to-r from-amber-500 to-transparent" />
+            <p className="text-amber-400 text-base sm:text-lg font-medium">{personal.title}</p>
           </div>
-        ))}
+        </div>
+
+        {/* Main grid */}
+        <div className="grid lg:grid-cols-3 gap-5 mb-5">
+
+          {/* Overview + Contact */}
+          <div className="lg:col-span-2 rounded-xl p-6 sm:p-7"
+               style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)" }}>
+            <p className="text-[10px] font-mono text-gray-600 tracking-[0.25em] mb-4">// OVERVIEW</p>
+            {personal.summary ? (
+              <p className="text-gray-300 leading-relaxed text-sm">{personal.summary}</p>
+            ) : (
+              <p className="text-gray-600 text-sm italic">어드민에서 자기소개를 입력하세요.</p>
+            )}
+
+            <div className="mt-6 pt-5" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+              <p className="text-[10px] font-mono text-gray-600 tracking-[0.25em] mb-4">// CONTACT</p>
+              <div className="grid sm:grid-cols-2 gap-2">
+                {personal.email && (
+                  <a href={`mailto:${personal.email}`}
+                     className="flex items-center gap-2.5 text-sm text-gray-400 hover:text-amber-400 transition-colors group">
+                    <span className="font-mono text-amber-600/50 group-hover:text-amber-500 text-xs shrink-0">→</span>
+                    {personal.email}
+                  </a>
+                )}
+                {personal.phone && (
+                  <div className="flex items-center gap-2.5 text-sm text-gray-400">
+                    <span className="font-mono text-amber-600/50 text-xs shrink-0">→</span>
+                    {personal.phone}
+                  </div>
+                )}
+                {personal.location && (
+                  <div className="flex items-center gap-2.5 text-sm text-gray-400">
+                    <span className="font-mono text-amber-600/50 text-xs shrink-0">→</span>
+                    {personal.location}
+                  </div>
+                )}
+                {personal.github && (
+                  <a href={personal.github} target="_blank" rel="noreferrer"
+                     className="flex items-center gap-2.5 text-sm text-gray-400 hover:text-amber-400 transition-colors group">
+                    <span className="font-mono text-amber-600/50 group-hover:text-amber-500 text-xs shrink-0">→</span>
+                    GitHub
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Stat readouts */}
+          <div className="flex flex-row lg:flex-col gap-4">
+            {[
+              { key: "CAREER",   value: "5Y+",                   sub: "총 경력" },
+              { key: "PROJECTS", value: "10+",                   sub: "참여 프로젝트" },
+              { key: "LOCATION", value: personal.location || "—", sub: "현재 위치" },
+            ].map((s) => (
+              <div key={s.key}
+                   className="flex-1 rounded-xl px-5 py-4"
+                   style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                <p className="text-[9px] font-mono tracking-[0.2em] mb-1.5" style={{ color: "rgba(217,119,6,0.5)" }}>
+                  {s.key}
+                </p>
+                <p className="text-2xl sm:text-3xl font-bold"
+                   style={{ textShadow: "0 0 20px rgba(217,119,6,0.3)" }}>
+                  {s.value}
+                </p>
+                <p className="text-[11px] text-gray-600 mt-1">{s.sub}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Key Elements */}
+        <div className="rounded-xl p-6 mb-8"
+             style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)" }}>
+          <p className="text-[10px] font-mono text-gray-600 tracking-[0.25em] mb-5">// KEY ELEMENTS</p>
+          <div className="flex flex-wrap gap-3">
+            {ELEMENTS.map((el) => <ElementCard key={el.symbol} {...el} />)}
+          </div>
+        </div>
+
+        {/* CTA */}
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href="/resume/"
+            className="px-7 py-3 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-[1.02]"
+            style={{
+              border: "1px solid rgba(217,119,6,0.5)",
+              color: "#f59e0b",
+              background: "rgba(217,119,6,0.07)",
+              boxShadow: "0 0 20px rgba(217,119,6,0.08)",
+            }}
+          >
+            이력서 열람 →
+          </Link>
+          <Link
+            href="/career/"
+            className="px-7 py-3 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition-all duration-200"
+            style={{ border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.02)" }}
+          >
+            경력기술서 열람 →
+          </Link>
+        </div>
+
       </div>
     </div>
   );
