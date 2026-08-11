@@ -9,6 +9,7 @@ const LABELS: Record<string, string> = {
   "/career/":           "Career",
   "/research/":         "Research",
   "/publications/":     "Publications",
+  "/projects/":         "Projects",
   "/entrepreneurship/": "Entrepreneurship",
   "/ai/":               "AI & Automation",
   "/skills/":           "Skills",

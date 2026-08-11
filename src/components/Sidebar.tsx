@@ -10,6 +10,7 @@ const NAV = [
   { href: "/career/",           label: "Career",           icon: "◎" },
   { href: "/research/",         label: "Research",         icon: "◇" },
   { href: "/publications/",     label: "Publications",     icon: "◆" },
+  { href: "/projects/",         label: "Projects",         icon: "◇" },
   { href: "/entrepreneurship/", label: "Entrepreneurship", icon: "◈" },
   { href: "/ai/",               label: "AI & Automation",  icon: "◌" },
   { href: "/skills/",           label: "Skills",           icon: "◐" },
