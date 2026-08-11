@@ -41,6 +41,23 @@ export const CAREER_ENTRIES: CareerEntry[] = [
     lane: 0,
   },
   {
+    id: "dagochyeo",
+    company: "(주)다고쳐",
+    companyEn: "DAGOCHYEO",
+    role: "팀원",
+    category: "Industry",
+    startYear: 2020,
+    startMonth: 1,
+    endYear: 2021,
+    endMonth: 6,
+    description: [
+      "생활 수리 서비스 O2O 플랫폼 스타트업 팀원",
+      "사업 운영 지원 및 고객 발굴(B2C) 참여",
+      "서비스 모델 검토 및 운영 프로세스 개선",
+    ],
+    lane: 0,
+  },
+  {
     id: "sellwave",
     company: "SELLWAVE",
     companyEn: "SELLWAVE",
