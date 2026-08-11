@@ -35,7 +35,7 @@ export const CAREER_ENTRIES: CareerEntry[] = [
     endMonth: 12,
     description: [
       "구리 합금 소재 연구개발 (Cu-Cr, Cu-Zr 계열)",
-      "신선·압연 공정 최적화 연구",
+      "압연 공정 최적화 연구",
       "재료 물성 평가 (인장강도, 경도, 전기전도도)",
     ],
     lane: 0,
