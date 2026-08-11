@@ -27,7 +27,7 @@ const yearToX = (year: number, month = 1) =>
 // ── Category styling ─────────────────────────────────────────────────────────
 const CAT_STYLE = {
   Industry: { fill: "#D97706", bg: "#FFFBEB", text: "#92400E", border: "#FDE68A", label: "산업 R&D" },
-  Startup:  { fill: "#7C3AED", bg: "#F5F3FF", text: "#5B21B6", border: "#DDD6FE", label: "창업" },
+  Startup:  { fill: "#7C3AED", bg: "#F5F3FF", text: "#5B21B6", border: "#DDD6FE", label: "스타트업" },
   Research: { fill: "#059669", bg: "#ECFDF5", text: "#065F46", border: "#6EE7B7", label: "연구" },
 };
 

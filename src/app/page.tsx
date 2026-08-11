@@ -128,13 +128,6 @@ export default function DashboardPage() {
         </div>
         <div className="flex gap-2 shrink-0">
           <Link
-            href="/cv/"
-            className="px-4 py-2 rounded-lg text-[13px] font-semibold transition-colors"
-            style={{ background: "#EFF6FF", color: "#2563EB", border: "1px solid #BFDBFE" }}
-          >
-            이력서 →
-          </Link>
-          <Link
             href="/career/"
             className="px-4 py-2 rounded-lg text-[13px] font-medium text-slate-500 hover:text-slate-800 transition-colors"
             style={{ border: "1px solid #E2E8F4", background: "#F8FAFC" }}

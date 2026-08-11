@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useEffect } from "react";
-import { PUBLICATIONS, type AuthorRole, type PubStatus } from "@/lib/data/publications";
+import { PUBLICATIONS, type AuthorRole, type PubStatus, type JournalIndex } from "@/lib/data/publications";
 import { logVisit } from "@/lib/supabaseClient";
 
 const ROLE_STYLE: Record<AuthorRole, { bg: string; text: string; border: string; label: string }> = {
@@ -15,6 +15,12 @@ const STATUS_STYLE: Record<PubStatus, { bg: string; text: string; label: string 
   Published:        { bg: "#ECFDF5", text: "#065F46", label: "게재" },
   Submitted:        { bg: "#FFFBEB", text: "#92400E", label: "심사중" },
   "In Preparation": { bg: "#F5F3FF", text: "#5B21B6", label: "준비중" },
+};
+
+const INDEX_STYLE: Record<JournalIndex, { bg: string; text: string }> = {
+  SCI:    { bg: "#FEF3C7", text: "#92400E" },
+  SCIE:   { bg: "#FEF3C7", text: "#92400E" },
+  SCOPUS: { bg: "#F3F4F6", text: "#374151" },
 };
 
 type FilterRole = AuthorRole | "all";
@@ -155,6 +161,19 @@ export default function PublicationsPage() {
                       {pub.year && (
                         <span className="text-[10px] font-mono text-slate-400">{pub.year}</span>
                       )}
+                      {pub.indexed && (
+                        <span
+                          className="text-[9px] font-black tracking-[0.08em] px-1.5 py-0.5 rounded"
+                          style={{ background: INDEX_STYLE[pub.indexed].bg, color: INDEX_STYLE[pub.indexed].text }}
+                        >
+                          {pub.indexed}
+                        </span>
+                      )}
+                      {pub.impactFactor && (
+                        <span className="text-[10px] font-mono text-slate-400">
+                          IF {pub.impactFactor.toFixed(1)}
+                        </span>
+                      )}
                     </div>
 
                     {/* Title */}
@@ -199,6 +218,21 @@ export default function PublicationsPage() {
                         {pub.volume ? `, ${pub.volume}` : ""}
                         {pub.pages ? `, pp. ${pub.pages}` : ""}
                       </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        {pub.indexed && (
+                          <span
+                            className="text-[9px] font-black tracking-[0.08em] px-1.5 py-0.5 rounded"
+                            style={{ background: INDEX_STYLE[pub.indexed].bg, color: INDEX_STYLE[pub.indexed].text }}
+                          >
+                            {pub.indexed}
+                          </span>
+                        )}
+                        {pub.impactFactor && (
+                          <span className="text-[11px] font-mono text-slate-500">
+                            IF {pub.impactFactor.toFixed(1)}{pub.ifYear ? ` (${pub.ifYear})` : ""}
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     {pub.doi && (
